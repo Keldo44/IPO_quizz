@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz IPO Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0078d4;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass: rgba(255, 255, 255, 0.7);
+            --fluent-curve: cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        /* Contenedor con efecto Glassmorphism */
+        #quiz-container {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Barra de progreso elegante */
+        .progress-container {
+            height: 6px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        #progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.8s var(--fluent-curve);
+            box-shadow: 0 0 15px rgba(0, 120, 212, 0.3);
+        }
+
+        /* Estilo de la pregunta */
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1b;
+            line-height: 1.4;
+            margin-bottom: 30px;
+            min-height: 90px;
+        }
+
+        /* Botones estilo Neumorphism/Fluent */
+        .options { display: flex; gap: 15px; }
+
+        button {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: #ffffff;
+            color: #444;
+            transition: all 0.3s var(--fluent-curve);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02), inset 0 0 0 1px rgba(0,0,0,0.05);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            background: #fff;
+            color: var(--primary);
+        }
+
+        button:active:not(:disabled) { transform: scale(0.96); }
+
+        /* Estados de respuesta */
+        .btn-correct { 
+            background: var(--success) !important; 
+            color: white !important;
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4) !important;
+        }
+
+        .btn-wrong { 
+            background: var(--error) !important; 
+            color: white !important;
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4) !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+
+        /* Animación de entrada de pregunta */
+        .fade-up {
+            animation: fadeUp 0.6s var(--fluent-curve);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Feedback de fondo */
+        body.correct-flash { background: #d4edda; }
+        body.wrong-flash { background: #f8d7da; }
+
+        .hidden { display: none !important; }
+
+        /* Rejilla de resultados */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 25px 0;
+        }
+
+        .grid-item {
+            padding: 12px;
+            text-align: center;
+            border-radius: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body id="body-bg">
+
+<div id="quiz-container">
+    <div id="quiz-header">
+        <div class="progress-container"><div id="progress-fill"></div></div>
+        <div style="display:flex; justify-content: space-between; margin-bottom: 20px;">
+            <span id="counter" style="font-weight: 700; color: var(--primary); font-size: 0.8rem; letter-spacing: 1px;">PREGUNTA 1/20</span>
+        </div>
+    </div>
+
+    <div id="content-area" class="fade-up">
+        <h2 id="question-text">Carregant pregunta...</h2>
+        <div class="options">
+            <button id="btn-true" onclick="handleAnswer(true)">CERT</button>
+            <button id="btn-false" onclick="handleAnswer(false)">FALS</button>
+        </div>
+    </div>
+
+    <div id="results-screen" class="hidden">
+        <h1 style="margin: 0 0 10px 0;">Completat!</h1>
+        <p id="final-stats" style="font-size: 1.1rem; color: #555;"></p>
+        <div class="results-grid" id="feedback-grid"></div>
+        <button onclick="location.reload()" style="width:100%; background: var(--primary); color: white;">Tornar a començar</button>
+    </div>
+</div>
+
+<script>
+    const allQuestions = [
+        // ==========================================
+        // BLOQUE 1: FUNDAMENTOS (ISO, Accesibilidad, UX)
+        // ==========================================
+        { id: 1, q: "La usabilidad se define según ISO 9241-11 como efectividad, eficiencia y satisfacción.", a: true },
+        { id: 2, q: "La accesibilidad web solo beneficia a personas con discapacidades sensoriales.", a: false },
+        { id: 3, q: "La Experiencia de Usuario (UX) engloba las emociones y percepciones del usuario.", a: true },
+        { id: 4, q: "Un sistema puede ser usable pero no ser accesible.", a: true },
+        { id: 5, q: "La eficiencia se mide por los recursos gastados en relación a la precisión de las metas.", a: true },
+        { id: 6, q: "La 'satisfacción' es la ausencia de incomodidad y la actitud positiva al usar el producto.", a: true },
+        { id: 7, q: "La ISO/IEC 25010 es el estándar que sustituye a la antigua ISO 9126 sobre calidad de software.", a: true },
+        { id: 8, q: "El diseño universal busca crear productos diferentes para cada tipo de discapacidad.", a: false },
+        { id: 9, q: "La accesibilidad es una responsabilidad ética y, en muchos casos, legal.", a: true },
+        { id: 10, q: "El término UX fue popularizado por Donald Norman en los años 90.", a: true },
+        { id: 11, q: "Un producto con buena usabilidad garantiza automáticamente una excelente UX.", a: false },
+        { id: 12, q: "Las pautas WCAG 2.1 son el estándar internacional para la accesibilidad web.", a: true },
+        { id: 13, q: "El principio 'Robustez' de la accesibilidad implica que el contenido sea interpretable por diversas herramientas.", a: true },
+        { id: 14, q: "La usabilidad solo se aplica a interfaces de ordenadores de sobremesa.", a: false },
+        { id: 15, q: "La 'facilidad de aprendizaje' (learnability) es un atributo clásico de la usabilidad.", a: true },
+        { id: 16, q: "El diseño inclusivo ignora las necesidades de los usuarios expertos.", a: false },
+        { id: 17, q: "La percepción estética puede influir positivamente en la usabilidad percibida.", a: true },
+        { id: 18, q: "La accesibilidad cognitiva no forma parte de las preocupaciones de la IPO.", a: false },
+        { id: 19, q: "La usabilidad es un proceso que debe evaluarse durante todo el ciclo de vida.", a: true },
+        { id: 20, q: "Un sistema 'utilizable' es siempre 'útil'.", a: false },
+
+        // ==========================================
+        // BLOQUE 2: DCU Y MODELO MPIu+a
+        // ==========================================
+        { id: 21, q: "El modelo MPIu+a sitúa la usabilidad como el pilar central del desarrollo.", a: true },
+        { id: 22, q: "En el DCU, los usuarios deben participar en todas las etapas del diseño.", a: true },
+        { id: 23, q: "El MPIu+a propone separar totalmente la ingeniería del software de la usabilidad.", a: false },
+        { id: 24, q: "El análisis de la competencia es una actividad común en la fase de análisis de requisitos.", a: true },
+        { id: 25, q: "Los 'Stakeholders' son cualquier persona u organización afectada por el sistema.", a: true },
+        { id: 26, q: "El diseño centrado en el usuario es un proceso lineal sin retroalimentación.", a: false },
+        { id: 27, q: "Una 'Persona' en DCU se basa en datos reales de usuarios, no en suposiciones.", a: true },
+        { id: 28, q: "El análisis de tareas permite conocer qué pasos sigue el usuario para cumplir un objetivo.", a: true },
+        { id: 29, q: "La fase de prototipado en MPIu+a ocurre antes de conocer los requisitos del usuario.", a: false },
+        { id: 30, q: "El diseño conceptual define el modelo mental que el sistema presentará al usuario.", a: true },
+        { id: 31, q: "El MPIu+a incluye una etapa específica de instalación y mantenimiento.", a: true },
+        { id: 32, q: "En DCU, el equipo de diseño debe ser obligatoriamente monodisciplinar.", a: false },
+        { id: 33, q: "La técnica de 'Escenarios' ayuda a contextualizar el uso del producto.", a: true },
+        { id: 34, q: "El modelo MPIu+a es compatible con metodologías ágiles como Scrum.", a: true },
+        { id: 35, q: "El análisis de requisitos de usabilidad incluye definir métricas cuantificables.", a: true },
+        { id: 36, q: "La 'Arquitectura de Información' organiza cómo se estructura el contenido.", a: true },
+        { id: 37, q: "El diseño visual debe decidirse antes que el diseño de interacción.", a: false },
+        { id: 38, q: "Un objetivo del DCU es reducir los costes de soporte técnico tras el lanzamiento.", a: true },
+        { id: 39, q: "La validación con usuarios es la última fase y no permite volver atrás.", a: false },
+        { id: 40, q: "El MPIu+a destaca la importancia del prototipado iterativo.", a: true },
+
+        // ==========================================
+        // BLOQUE 3: PROTOTIPADO
+        // ==========================================
+        { id: 41, q: "Un prototipo de baja fidelidad es ideal para detectar errores de flujo narrativo.", a: true },
+        { id: 42, q: "Los prototipos de alta fidelidad se crean habitualmente con papel y lápiz.", a: false },
+        { id: 43, q: "El 'Storyboarding' es una técnica de prototipado situacional.", a: true },
+        { id: 44, q: "Los prototipos horizontales muestran toda la interfaz pero sin funcionalidad profunda.", a: true },
+        { id: 45, q: "Un prototipo vertical implementa pocas funciones pero de forma completa (hasta la BD).", a: true },
+        { id: 46, q: "Los prototipos de baja fidelidad distraen al usuario con detalles estéticos innecesarios.", a: false },
+        { id: 47, q: "Un Wireframe es una representación estática de la estructura de una pantalla.", a: true },
+        { id: 48, q: "El prototipado evolutivo busca que el prototipo se convierta en el producto final.", a: true },
+        { id: 49, q: "El prototipado desechable se tira una vez se han validado los requisitos.", a: true },
+        { id: 50, q: "El 'Mago de Oz' es una técnica donde un humano simula la respuesta del sistema.", a: true },
+        { id: 51, q: "Los prototipos Hi-Fi permiten realizar tests de rendimiento técnico real.", a: true },
+        { id: 52, q: "Prototipar en papel es una pérdida de tiempo en proyectos de software complejo.", a: false },
+        { id: 53, q: "Los prototipos permiten comunicar ideas a los stakeholders de forma tangible.", a: true },
+        { id: 54, q: "Un Mockup es lo mismo que un prototipo funcional interactivo.", a: false },
+        { id: 55, q: "El prototipado reduce la ambigüedad en las especificaciones.", a: true },
+        { id: 56, q: "En fases iniciales, es mejor usar prototipos de alta fidelidad.", a: false },
+        { id: 57, q: "Las herramientas como Figma o Adobe XD permiten crear prototipos de fidelidad media-alta.", a: true },
+        { id: 58, q: "Un prototipo puede ayudar a estimar mejor los tiempos de desarrollo.", a: true },
+        { id: 59, q: "Los usuarios tienden a dar feedback más crítico sobre el diseño en prototipos Lo-Fi.", a: true },
+        { id: 60, q: "El prototipado rápido ignora por completo las necesidades del usuario.", a: false },
+
+        // ==========================================
+        // BLOQUE 4: EVALUACIÓN
+        // ==========================================
+        { id: 61, q: "La evaluación heurística es un método de inspección realizado por expertos.", a: true },
+        { id: 62, q: "Un test de usuarios requiere al menos 50 personas para ser válido en diseño formativo.", a: false },
+        { id: 63, q: "La técnica 'Think Aloud' obliga al usuario a explicar qué está haciendo y por qué.", a: true },
+        { id: 64, q: "La evaluación sumativa se realiza durante el desarrollo para corregir errores.", a: false },
+        { id: 65, q: "El cuestionario SUS (System Usability Scale) mide la usabilidad percibida.", a: true },
+        { id: 66, q: "En un test de usuarios, el evaluador debe ayudar al usuario si este se bloquea.", a: false },
+        { id: 67, q: "La evaluación formativa ayuda a guiar el diseño mientras se está creando.", a: true },
+        { id: 68, q: "Los métodos empíricos se basan en la observación de usuarios reales.", a: true },
+        { id: 69, q: "El 'Recorrido Cognitivo' se centra en evaluar la facilidad de aprendizaje del sistema.", a: true },
+        { id: 70, q: "El Eye-tracking permite saber exactamente qué está mirando el usuario.", a: true },
+        { id: 71, q: "La evaluación heurística de Nielsen incluye 10 principios generales.", a: true },
+        { id: 72, q: "Un error crítico es aquel que impide al usuario completar la tarea principal.", a: true },
+        { id: 73, q: "El test de guerrilla es costoso y requiere laboratorios especializados.", a: false },
+        { id: 74, q: "Los tests remotos pueden ser síncronos o asíncronos.", a: true },
+        { id: 75, q: "La tasa de éxito es una métrica común en los tests de usabilidad.", a: true },
+        { id: 76, q: "Los expertos en una evaluación heurística siempre detectan el 100% de los errores.", a: false },
+        { id: 77, q: "El feedback post-test es útil para recoger impresiones subjetivas.", a: true },
+        { id: 78, q: "La observación directa puede influir en el comportamiento del usuario (efecto Hawthorne).", a: true },
+        { id: 79, q: "Un informe de evaluación debe priorizar los problemas encontrados según su gravedad.", a: true },
+        { id: 80, q: "La evaluación de accesibilidad solo se puede hacer con herramientas automáticas.", a: false },
+
+        // ==========================================
+        // BLOQUE 5: DISEÑO DE LA INTERFAZ (UI)
+        // ==========================================
+        { id: 81, q: "Los 'Affordances' son las posibilidades de acción que un objeto sugiere al usuario.", a: true },
+        { id: 82, q: "La Ley de Fitts predice el tiempo necesario para moverse a un objetivo.", a: true },
+        { id: 83, q: "La consistencia externa significa que nuestra App debe parecerse a otras App del mercado.", a: true },
+        { id: 84, q: "El principio de visibilidad implica ocultar el estado del sistema para no agobiar.", a: false },
+        { id: 85, q: "Los errores deben ser prevenidos mediante un diseño que minimice las equivocaciones.", a: true },
+        { id: 86, q: "La Ley de Hick dice que el tiempo de decisión aumenta con el número de opciones.", a: true },
+        { id: 87, q: "El uso de metáforas (ej. la papelera) ayuda al usuario a entender el sistema.", a: true },
+        { id: 88, q: "La carga cognitiva debe ser maximizada para mantener al usuario atento.", a: false },
+        { id: 89, q: "El contraste de color es vital para la legibilidad y la accesibilidad.", a: true },
+        { id: 90, q: "Los menús de navegación deben ser lo más profundos posible.", a: false },
+        { id: 91, q: "La respuesta del sistema a una acción del usuario debe ser inmediata (feedback).", a: true },
+        { id: 92, q: "El diseño minimalista elimina cualquier elemento que no aporte valor a la tarea.", a: true },
+        { id: 93, q: "El 'Modelo Mental' es la idea que el usuario tiene de cómo funciona el sistema.", a: true },
+        { id: 94, q: "Los usuarios expertos prefieren atajos de teclado y aceleradores.", a: true },
+        { id: 95, q: "El agrupamiento de elementos relacionados se basa en las leyes de la Gestalt.", a: true },
+        { id: 96, q: "La tipografía solo tiene una función estética en el diseño de interfaces.", a: false },
+        { id: 97, q: "Los mensajes de error deben indicar claramente el problema y sugerir una solución.", a: true },
+        { id: 98, q: "La 'Familiaridad' reduce el esfuerzo necesario para aprender una nueva interfaz.", a: true },
+        { id: 99, q: "Un buen diseño obliga al usuario a recordar muchos datos entre pantallas.", a: false },
+        { id: 100, q: "La jerarquía visual guía el ojo del usuario hacia los elementos más importantes.", a: true },
+
+        // ==========================================
+        // Preguntes extretes de l'examen 2016-17
+        // ==========================================
+        { id: 101, q: "L'Standard ISO 9241-11 defineix USABILITAT independentment del context d'ús on es produeix la interacció.", a: false },
+        { id: 102, q: "Segons l'ISO/IEC 25010:2011, la usabilitat està present tant en la Qualitat en l'ús com en la Qualitat del producte.", a: true },
+        { id: 103, q: "L'experiència d'usuari (UX) atén factors interns i externs que causen sensacions en un context d'ús determinat.", a: true },
+        { id: 104, q: "El Disseny Centrat en l'Usuari (DCU) implica que els usuaris participen directament com si fossin dissenyadors.", a: false },
+        { id: 105, q: "El model MPlu+a integra el cicle de vida de l'Enginyeria del Software amb el Disseny Centrat en l'Usuari.", a: true },
+        { id: 106, q: "Un prototip s'utilitza per explorar aspectes interactius, incloent usabilitat, accessibilitat i funcionalitat.", a: true },
+        { id: 107, q: "Un 'wireframe' és una tècnica d'avaluació de la usabilitat que utilitza una versió pseudo-interactiva.", a: false },
+        { id: 108, q: "L'storyboarding i els escenaris es classifiquen com a 'tècniques de prototipat situacional'.", a: true },
+        { id: 109, q: "La percepció humana és independent de les experiències passades o del context d'ús segons el disseny d'interfícies.", a: false },
+        { id: 110, q: "El terme 'satisfycing' vol dir que els usuaris només estan satisfets si troben el camí òptim.", a: false },
+        { id: 111, q: "El Número de Miller és útil per determinar el nombre d'opcions en un menú auditiu a causa de la STM.", a: true },
+        { id: 112, q: "La Computació Ubiqua estén la capacitat d'interacció a tot l'entorn, el que coneixem com a IoT.", a: true },
+        { id: 113, q: "El terme 'stakeholders' o implicats inclou també els usuaris finals del sistema.", a: true },
+        { id: 114, q: "El Model Mental dels usuaris és molt estable perquè les persones recordem amb detall el que fem.", a: false },
+        { id: 115, q: "La satisfacció és l'atribut d'usabilitat més difícil de mesurar pel seu component subjectiu.", a: true },
+        { id: 116, q: "Els prototips d'alt nivell poden generar falses expectatives entre els usuaris o clients finals.", a: true },
+
+        // ==========================================
+        // Preguntes extretes de l'examen 2017-18
+        // ==========================================
+        { id: 117, q: "En el model ISO/IEC 25010:2011, la usabilitat hi apareix de forma secundària.", a: false },
+        { id: 118, q: "En el Disseny Centrat en l'Usuari (DCU), la usabilitat és l'objectiu principal.", a: true },
+        { id: 119, q: "Els stakeholders només inclouen els usuaris directes, no els indirectes.", a: false },
+        { id: 120, q: "L'objectiu principal d'un prototip en paper és verificar tant les idees interactives com l'estètica final.", a: false },
+        { id: 121, q: "La percepció es veu molt influenciada per experiències passades, context i objectius personals.", a: true },
+        { id: 122, q: "La consistència d'una interfície redueix el temps d'aprenentatge i elimina la confusió.", a: true },
+        { id: 123, q: "Una interfície responsive sempre és més usable que una que no ho és pel fet d'ajustar-se a la mida.", a: false },
+        { id: 124, q: "La navegabilitat fa referència a la coherència amb l'Arquitectura de la Informació i la jerarquia.", a: true },
+        { id: 125, q: "La tipografia és un element que no afecta a la usabilitat ni a l'experiència d'usuari.", a: false },
+        { id: 126, q: "Si la interfície és usable, l'estètica ja no és important en termes d'usabilitat.", a: false },
+        { id: 127, q: "L'ús actual dels automòbils és un exemple del paradigma de Computació Ubiqua.", a: true },
+        { id: 128, q: "La satisfacció és el més fàcil de mesurar dels atributs de la usabilitat.", a: false },
+        { id: 129, q: "Els prototips de baix nivell són eines potents per a la comunicació entre l'equip de disseny i stakeholders.", a: true },
+        { id: 130, q: "Els 'menús auditius' generen poca demanda d'emmagatzemament i processament a la memòria STM.", a: false }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userResults = [];
+    let lock = false;
+
+    function init() {
+        // 1. Mezclamos el array completo de forma aleatoria
+        // 2. Usamos .slice(0, 20) para quedarnos solo con las primeras 20 del resultado mezclado
+        currentQuestions = [...allQuestions]
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 20);
+
+        // Reiniciamos el índice por si acaso se llama a init() más de una vez
+        currentIndex = 0;
+        userResults = [];
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        lock = false;
+        const qData = currentQuestions[currentIndex];
+        document.getElementById('question-text').innerText = qData.q;
+        document.getElementById('counter').innerText = `PREGUNTA ${currentIndex + 1}/${currentQuestions.length}`;
+        document.getElementById('progress-fill').style.width = `${((currentIndex + 1) / currentQuestions.length) * 100}%`;
+        
+        // Reset botones
+        document.getElementById('btn-true').className = '';
+        document.getElementById('btn-false').className = '';
+        document.getElementById('content-area').classList.remove('fade-up');
+        void document.getElementById('content-area').offsetWidth; // Trigger reflow
+        document.getElementById('content-area').classList.add('fade-up');
+    }
+
+    function handleAnswer(ans) {
+        if (lock) return;
+        lock = true;
+
+        const qData = currentQuestions[currentIndex];
+        const isCorrect = ans === qData.a;
+        const btnClicked = document.getElementById(ans ? 'btn-true' : 'btn-false');
+        const body = document.getElementById('body-bg');
+
+        userResults.push({ id: qData.id, correct: isCorrect });
+
+        if (isCorrect) {
+            btnClicked.classList.add('btn-correct');
+            body.classList.add('correct-flash');
+            setTimeout(() => {
+                body.classList.remove('correct-flash');
+                next();
+            }, 500); // Rápido si aciertas
+        } else {
+            btnClicked.classList.add('btn-wrong');
+            document.getElementById(qData.a ? 'btn-true' : 'btn-false').classList.add('btn-correct');
+            body.classList.add('wrong-flash');
+            setTimeout(() => {
+                body.classList.remove('wrong-flash');
+                next();
+            }, 2000); // Penalización de 2s
+        }
+    }
+
+    function next() {
+        if (currentIndex < currentQuestions.length - 1) {
+            currentIndex++;
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('content-area').classList.add('hidden');
+        document.getElementById('quiz-header').classList.add('hidden');
+        document.getElementById('results-screen').classList.remove('hidden');
+        
+        const corrects = userResults.filter(r => r.correct).length;
+        document.getElementById('final-stats').innerHTML = `Has encertat <strong>${corrects}</strong> preguntes.`;
+        
+        const grid = document.getElementById('feedback-grid');
+        userResults.forEach(r => {
+            const div = document.createElement('div');
+            div.className = `grid-item ${r.correct ? 'btn-correct' : 'btn-wrong'}`;
+            div.innerText = r.id;
+            grid.appendChild(div);
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
