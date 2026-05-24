@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz IPO Premium - 32 Preguntas</title>
+    <title>Quiz IPO Premium - Amb Raonament</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --success: #2ecc71;
             --error: #e74c3c;
             --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --glass: rgba(255, 255, 255, 0.7);
+            --glass: rgba(255, 255, 255, 0.75);
             --fluent-curve: cubic-bezier(0.1, 0.9, 0.2, 1);
         }
 
@@ -28,379 +28,383 @@
             transition: background 0.5s ease;
         }
 
-        #quiz-container {
+        .container {
             background: var(--glass);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 2.5rem;
             border-radius: 24px;
-            padding: 40px;
-            width: 95%;
-            max-width: 600px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            margin: 20px;
+            width: 90%;
+            max-width: 650px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s var(--fluent-curve);
         }
 
+        h2 { margin-top: 0; color: #2c3e50; font-size: 1.6rem; line-height: 1.4; }
+        
         .progress-container {
-            height: 6px;
+            width: 100%;
             background: rgba(0,0,0,0.05);
+            height: 8px;
             border-radius: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
+            overflow: hidden;
         }
-        #progress-fill {
+
+        .progress-bar {
             height: 100%;
             background: var(--primary);
             width: 0%;
-            border-radius: 10px;
-            transition: width 0.8s var(--fluent-curve);
+            transition: width 0.4s ease;
         }
 
-        h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1a1a1b;
-            line-height: 1.4;
-            margin-bottom: 30px;
-            min-height: 80px;
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
-        .options { display: flex; gap: 15px; }
+        .btn-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
 
         button {
-            flex: 1;
-            padding: 18px;
-            border: none;
-            border-radius: 16px;
+            padding: 1rem 2rem;
             font-size: 1rem;
             font-weight: 700;
+            border: none;
+            border-radius: 14px;
             cursor: pointer;
-            background: #ffffff;
-            color: #444;
-            transition: all 0.3s var(--fluent-curve);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02), inset 0 0 0 1px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            font-family: inherit;
         }
 
-        button:hover:not(:disabled) {
-            transform: translateY(-4px);
-            color: var(--primary);
+        .btn-true { background: #e8f8f5; color: #117a65; border: 2px solid #a3e4d7; }
+        .btn-true:hover:not(:disabled) { background: #d1f2eb; transform: translateY(-2px); }
+        
+        .btn-false { background: #fdf2f2; color: #922b21; border: 2px solid #f9d5d5; }
+        .btn-false:hover:not(:disabled) { background: #fadbd8; transform: translateY(-2px); }
+
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+        /* ====== SECCIÓ DE RAONAMENT A AMPLE COMPLET ====== */
+        .reasoning-box {
+            grid-column: span 2; /* Això fa que ocupi tot l'ample de la graella */
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 16px;
+            animation: slideIn 0.4s var(--fluent-curve) forwards;
+            display: none;
+            border-left: 5px solid transparent;
+            width: 100%;
         }
 
-        .btn-correct { background: var(--success) !important; color: white !important; }
-        .btn-wrong { background: var(--error) !important; color: white !important; animation: shake 0.4s; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
+        .reasoning-box.correct {
+            background: rgba(46, 204, 113, 0.15);
+            border-left-color: var(--success);
+            color: #1e7e34;
         }
 
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
-            margin: 20px 0;
+        .reasoning-box.wrong {
+            background: rgba(231, 76, 60, 0.15);
+            border-left-color: var(--error);
+            color: #b21f1f;
         }
 
-        .grid-item {
-            padding: 8px 4px;
-            text-align: center;
-            border-radius: 6px;
+        .reasoning-title { font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .reasoning-text { font-size: 0.95rem; line-height: 1.5; color: #2c3e50; }
+
+        .btn-next {
+            grid-column: span 2; /* Ocupa tot l'ample de la graella */
+            background: var(--primary);
             color: white;
-            font-weight: 700;
-            font-size: 0.7rem;
+            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+            margin-top: 1rem;
+            display: none;
+            width: 100%;
         }
+        .btn-next:hover { background: #0066b3; transform: translateY(-2px); }
+
+        /* ================================================ */
 
         .hidden { display: none !important; }
-        body.correct-flash { background: #d4edda; }
-        body.wrong-flash { background: #f8d7da; }
+
+        #results-screen { text-align: center; }
+        .grade-display { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin: 1rem 0; }
+
+        .grid-item {
+            padding: 0.5rem; border-radius: 8px; text-align: center; font-weight: bold; font-size: 0.85rem;
+        }
+        .btn-correct { background: #2ecc71; color: white; }
+        .btn-wrong { background: #e74c3c; color: white; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body id="body-bg">
+<body>
 
-<div id="quiz-container">
-    <div id="quiz-header">
-        <div class="progress-container"><div id="progress-fill"></div></div>
-        <div style="display:flex; justify-content: space-between; margin-bottom: 20px;">
-            <span id="counter" style="font-weight: 700; color: var(--primary); font-size: 0.8rem;">PREGUNTA 1/32</span>
+    <div class="container">
+        <div id="quiz-header">
+            <div class="meta-info">
+                <span id="question-counter">Pregunta 1 de X</span>
+                <span id="score-live">Nota temporal: 0.000</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div id="content-area">
+            <h2 id="question-text">Carregant pregunta...</h2>
+            
+            <div class="btn-container">
+                <button class="btn-true" id="btn-true" onclick="handleAnswer(true)">CERT</button>
+                <button class="btn-false" id="btn-false" onclick="handleAnswer(false)">FALS</button>
+                
+                <div class="reasoning-box" id="reasoning-box">
+                    <div class="reasoning-title" id="reasoning-title"></div>
+                    <div class="reasoning-text" id="reasoning-text"></div>
+                </div>
+
+                <button class="btn-next" id="btn-next" onclick="nextQuestion()">Següent pregunta ➔</button>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden">
+            <h2>Simulació Finalitzada</h2>
+            <div class="grade-display" id="final-grade">0.000</div>
+            <p id="final-stats"></p>
+            <hr style="border: 0; height: 1px; background: rgba(0,0,0,0.1); margin: 1.5rem 0;">
+            <div id="feedback-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 6px;"></div>
+            <button style="background:#2c3e50; color:white; margin-top:2rem; width:100%;" onclick="window.location.reload()">Torna a intentar-ho</button>
         </div>
     </div>
 
-    <div id="content-area">
-        <h2 id="question-text">Carregant preguntes...</h2>
-        <div class="options">
-            <button id="btn-true" onclick="handleAnswer(true)">CERT</button>
-            <button id="btn-false" onclick="handleAnswer(false)">FALS</button>
-        </div>
-    </div>
+    <script>
+        const allQuestions = [
+            // ==========================================
+            // TEMA 2: EL FACTOR HUMÀ (Preguntes 1 - 30)
+            // ==========================================
+            { id: 1, q: "L'objectiu fonamental del disseny d'interfícies és partir de com funcionen realment les persones i no de com ens agradaria que funcionessin.", a: true, r: "Correcte. El disseny centrat en l'usuari (UCD) dicta que la tecnologia és la que s'ha d'adaptar a la naturalesa humana, limitacions biològiques i capacitats de les persones." },
+            { id: 2, q: "El model de processament humà està integrat exclusivament per dos subsistemes de control: el perceptiu i el cognitiu.", a: false, r: "Fals. El Model de Processament Humà (MHP) està compost per tres subsistemes interconnectats: el perceptiu, el cognitiu i el motor." },
+            { id: 3, q: "El subsistema motor és l'encarregat d'executar la resposta física triada o planificada pel sistema mitjançant actuadors com les mans o la veu.", a: true, r: "Correcte. Actua com l'executor físic de les decisions preses pel sistema cognitiu utilitzant els músculs, braços, dits o la parla." },
+            { id: 4, q: "La fòvea és la regió central del camp visual de l'ésser humà que disposa de màxima resolució perceptiva.", a: true, r: "Correcte. La fòvea conté la màxima concentració de cons (receptors visuals), sent l'única àrea capaç de distingir detalls amb alta definició." },
+            { id: 5, q: "Ignorar qualsevol de les fases del cicle d'acció de l'usuari durant el disseny no causa problemes rellevants, atès que l'usuari s'autocorregeix de manera innata.", a: false, r: "Fals. El cicle de Norman indica que trencar o ignorar qualsevol de les set fases provoca de manera directa frustració, llacunes d'execució/avaluació i errors en la interacció." },
+            { id: 6, q: "El daltonisme afecta especialment la percepció del vermell i el verd, motiu pel qual cal combiner sempre l'ús d'aquests colors amb codis alternatius o símbols.", a: true, r: "Correcte. Les deficiències cromàtiques (com la deuteranopia) impedeixen distingir el vermell del verd. Per tant, la informació no s'ha de transmetre mai només amb el color." },
+            { id: 7, q: "Les alertes visuals agressives (com pop-ups perifèrics i parpelleigs) s'han d'implementar per a qualsevol canvi d'estat corrent de la interfície per garantir l'atenció contínua.", a: false, r: "Fals. S'anomenen 'artilleria pesada' i s'han de reservar exclusivament per a situacions crítiques o d'error greu, ja que altrament saturen l'atenció de l'usuari." },
+            { id: 8, q: "El 'top-down processing' o processament dirigit per conceptes explica que els usuaris interpreten elements visuals ambigus segons el context present de l'entorn.", a: true, r: "Correcte. El cervell utilitza experiències prèvies i el context que l'envolta per anticipar i donar sentit ràpid a elements visuals que per si sols són ambigus." },
+            { id: 9, q: "La ceguesa per desatenció és el fenomen psicològic pel qual un usuari pot escanejar una pantalla i ignorar del tot elements visibles si aquests no tenen relació directa amb el seu objectiu actual.", a: true, r: "Correcte. Si l'atenció està molt focalitzada en una tasca concreta, l'ésser humà es torna literalment cec davant d'estímuls molt evidents que no estan alineats amb el seu objectiu." },
+            { id: 10, q: "Segons les lleis de la Gestalt, el cervell humà processa primer cada element de forma aïllada i després reconeix l'estructura o conjunt global.", a: false, r: "Fals. La Gestalt postula precisament el contrari: el cervell humà té una percepció holística, és a dir, percep primer el tot estructurat abans que les parts individuals." },
+            { id: 11, q: "La llei de la proximitat postula que els elements que es troben geogràficament més propers en un espai visual tendiran a percebre's com a relacionats o del mateix grup.", a: true, r: "Correcte. La proximitat de distància genera de manera instantània una agrupació mental en la percepció de l'usuari." },
+            { id: 12, q: "La memòria de treball a curt termini és volàtil i té capacitat per gestionar una quantitat limitada de només 3 o 4 ítems simultàniament de manera eficaç.", a: true, r: "Correcte. Tot i que històricament es parlava de més ítems, els estudis moderns d'interacció demostren que la capacitat real de processament actiu conscient se situa al voltant de 3 o 4 unitats d'informació." },
+            { id: 13, q: "La coneguda 'regla dels 7' com a capacitat inalterable i exacta de la memòria de treball immediata s'ha demostrat científicament que és un mite dins del disseny modern.", a: true, r: "Correcte. Considerar que un menú ha de tenir 7 elements simplement per una 'regla' fixa és erroni; depèn totalment de l'organització conceptual i la càrrega de la tasca." },
+            { id: 14, q: "El mecanisme del 'chunking' consisteix a dividir els continguts d'informació en fragments el més grans possibles per evitar que l'usuari hagi de rellegir.", a: false, r: "Fals. El 'chunking' consisteix a fragmentar la informació en unitats *petites* i significatives (com separar un telèfon en grups de 3 xifres) per facilitar la retenció." },
+            { id: 15, q: "En el context de la memòria a llarg termini, el principi fonamental és que per a una persona reconèixer és cognitivament molt més fàcil i ràpid que recordar de memòria.", a: true, r: "Correcte. Reconèixer es basa en senyals visuals presents (com icones o menús), mentre que recordar obliga el cervell a extreure la informació des del buit, demanant més esforç." },
+            { id: 16, q: "Les interfícies de línia de comandes són superiors a les interfícies gràfiques d'usuari (GUI) pel que fa a reducció de càrrega de memòria, ja que obliguen a triar d'una llista fixa.", a: false, r: "Fals. Les línies de comandes requereixen *recordar* de memòria les instruccions exactes, mentre que les interfícies gràfiques permeten *reconèixer* les opcions en pantalla, reduint dràsticament la càrrega." },
+            { id: 17, q: "L'audició és un canal sensorial crític i prioritari en interfícies dissenyades per a contextos on la visió no es pot distreure de cap manera, com en sistemes de navegació de vehicles.", a: true, r: "Correcte. Quan la visió està totalment ocupada (conduint o operant maquinària), els estímuls d'àudio i so assumeixen el rol de canal d'entrada principal de seguretat." },
+            { id: 18, q: "L'olfacte no té cap relació amb el sistema límbic del cerveu humà, per la qual cosa no té utilitat potencial a l'hora d'evocar records en un entorn immersiu.", a: false, r: "Fals. L'olfacte té una connexió anatòmica directa i molt íntima amb el sistema límbic (emocions i memòria), sent un canal excel·lent per generar records persistents." },
+            { id: 19, q: "El sentit del tacte en disseny no només engloba els receptors de la superfície de la pell, sinó que inclou també el sistema cinestèsic i el vestibular.", a: true, r: "Correcte. Dins de l'àmbit hàptic i sensorial, el tacte comprèn la pell (cutani), la posició dels músculs i articulacions (cinestèsia) i l'equilibri (vestibular)." },
+            { id: 20, q: "Una 'affordance' és la capacitat inherent d'un objecte per comunicar de manera intuitiva, a través de la seva pròpia estructura visual o forma, com ha de ser manipulat.", a: true, r: "Correcte. Per exemple, un botó tridimensional convida a ser polsat i una nansa convida a ser estirada sense necessitat de cap cartell explicatiu." },
+            { id: 21, q: "En les interfícies de pantalles tàctils moderns, el mode 'hover' (estat de passar el cursor per sobre) s'ha mantingut inalterat i es fa servir de la mateixa forma que en un ordinador de sobretaula.", a: false, r: "Fals. En pantalles tàctils no existeix un punter físic surant, per la qual cosa l'estat 'hover' desapareix i les accions s'han de dissenyar per ser visibles sense dependre de passar per sobre." },
+            { id: 22, q: "Com a pauta general de disseny visual, les etiquetes de text per si soles solen comunicar el significat de l'acció com molta més claredat i precisió que l'ús d'icones aïllades.", a: true, r: "Correcte. El text és explícit. Les icones aïllades solen patir d'ambigüitat, excepte aquelles universalment estandarditzades (com la lupa per a cercar)." },
+            { id: 23, q: "El sistema visual humà és altament precís i sensible captant nivells absolutament homogenis de brillantor en lloc de respondre a diferències de color i contrast.", a: false, r: "Fals. El sistema visual humà és relativament dolent avaluant valors absolut d'il·luminació o brillantor, però és extraordinàriament eficaç detectant contrastos i vores." },
+            { id: 24, q: "El contrast guanya clarament a la brillantor en quant a efectivitat per a la sensibilitat i diferenciació per part del sistema visual.", a: true, r: "Correcte. La sensibilitat humana es basa en les diferències relatives (contrast) entre un element i el seu fons, no en el valor absolut de llum emesa." },
+            { id: 25, q: "Els usuaris construeixen models mentals interns basats únicament i exclusiva en el context present, oblidant els seus objectius futurs o experiències viscudes anteriorment.", a: false, r: "Fals. Un model mental es nodreix de tres eixos: les experiències del passat, la percepció del context present i les expectatives d'objectius futurs." },
+            { id: 26, q: "La funció principal del subsistema perceptiu és rebre els estímuls de l'entorn digital i transformar-los en codis de naturalesa simbòlica per al cervell.", a: true, r: "Correcte. Captura els senyals externs mitjançant els sentits (buffers sensorials) i els digitalitza en representacions que el sistema cognitiu pugui processar." },
+            { id: 27, q: "Factors físics del disseny com la pal·lidesa exagerada, les dimensions excessivament petites o una gran separació espacial dificulten la identificació correcta dels colors.", a: true, r: "Correcte. Són barreres visuals estudiades que degraden la capacitat del canal visual per categoritzar i associar un color amb un significat." },
+            { id: 28, q: "Per transmetre missatges d'errors o accions crítiques, situar l'avís de forma predictiva a prop del focus de visió on l'usuari està actuant és molt efectiu.", a: true, r: "Correcte. Com que la visió d'alta resolució es limita a la fòvea (focus central), col·locar l'alerta on l'usuari té la mirada garanteix la recepció del missatge sense necessitat de moure els ulls." },
+            { id: 29, q: "El processament inconscient no té pràcticament cap pes en la interacció diària; l'usuari processa la totalitat de la informació visual de manera deliberada i lògica.", a: false, r: "Fals. Gran part de la nostra interacció es regeix per mecanismes automàtics, rutines apreses i reaccions viscerals (inconscients) que minimitzen l'esforç mental actiu." },
+            { id: 30, q: "Dins dels pilars psicològics de la UX, s'estableix de forma clara que les persones tenen una atenció que és tant limitada com clarament atreta pel factor de la novetat.", a: true, r: "Correcte. L'atenció és un recurs escàs i el cervell humà respon de forma innata i prioritària davant de qualsevol canvi brusc o element inesperat (novetat)." },
 
-    <div id="results-screen" class="hidden">
-        <h1>Resultats Final</h1>
-        <div id="score-box" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; border: 1px solid #ddd;">
-            <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);" id="final-grade">0.00</div>
-            <div style="color: #666; font-size: 0.9rem;">Nota Final (sobre 8)</div>
-        </div>
-        <p id="final-stats" style="font-size: 1rem; color: #444; line-height: 1.6;"></p>
-        <div class="results-grid" id="feedback-grid"></div>
-        <button onclick="location.reload()" style="width:100%; background: var(--primary); color: white; margin-top: 10px;">Reintentar Test</button>
-    </div>
-</div>
+            // ==========================================
+            // TEMA 7: ACCESSIBILITAT DIGITAL (Preguntes 31 - 60)
+            // ==========================================
+            { id: 31, q: "L'accessibilitat digital és la disciplina que s'encarrega d'assegurar que totes les persones puguin percebre, entendre i interactuar amb les TIC de la forma més autònoma possible.", a: true, r: "Correcte. Aquesta és la definició fundacional de l'accessibilitat: obrir camí digital eliminant barreres arquitectòniques en el programari." },
+            { id: 32, q: "Els quatre grans grups de discapacitats rellevants i estudiats en l'àmbit d'IPO són les de tipus visual, auditiu, motriu i cognitiu.", a: true, r: "Correcte. Són els quatre pilars en què es basen les directrius de disseny i les pautes del W3C per cobrir l'espectre d'afectacions humanes." },
+            { id: 33, q: "Programaris especialitzats de lectura de pantalla com JAWS, NVDA o Orca s'engloben dins de la categoria de tecnologies assistencials.", a: true, r: "Correcte. Són solucions de programari (software assistencial) que tradueixen el codi de la pantalla en síntesi de veu o Braille per a usuaris cecs." },
+            { id: 34, q: "Dispositius com polsadors físics, polsadors de cap (Head Mouse) o pantalles/tauletes Braille són programaris que analitzen de manera automàtica l'accessibilitat d'una pàgina web.", a: false, r: "Fals. No són programaris analitzadors, sinó components de *maquinari* (hardware) de tecnologia assistencial que empren els usuaris per operar el sistema." },
+            { id: 35, q: "El 'Disseny Universal' o 'Design for All' defensa la filosofia de crear múltiples versions de disseny tancades i diferents, una per a cada grup de discapacitat.", a: false, r: "Fals. El Disseny Universal cerca crear *una única solució única i flexible* que sigui inherentment vàlida per a tothom, sense haver de bifurcar el producte en camins separats." },
+            { id: 36, q: "El 'Disseny Inclusiu' es caracteritza per enfocar-se en el fet que els productes de consum massiu puguin ser utilitzats pel màxim nombre d'usuaris sense haver de fer modificacions especials.", a: true, r: "Correcte. Es basa a reconèixer l'exclusió de forma primerenca i integrar opcions que acullin la diversitat humana dins del mateix flux comercial." },
+            { id: 37, q: "L'accessibilitat digital ha d'entendre's com una etapa aïllada i final que s'afegeix directament un cop s'ha programat tot el lloc web o aplicació.", a: false, r: "Fals. S'ha d'integrar de forma transversal des de la concepció i el disseny; aplicar-la al final (com un pegat) genera codi ineficient i és molt costós de resoldre." },
+            { id: 38, q: "Els documents en format PDF són utilitzats sovint gràcies a factors com la portabilitat multiplataforma, la fidelitat de reproducció i el seu suport natiu per a formularis digitals accessibles.", a: true, r: "Correcte. El format PDF és ideal per mantenir l'estructura visual intacta arreu i permet incorporar etiquetatge (tags) per garantir l'accessibilitat amb lectors de pantalla." },
+            { id: 39, q: "L'organització internacional IGDA ha generat documents i guies metodològiques de bones pràctiques enfocades a l'accessibilitat en el sector dels videojocs.", a: true, r: "Correcte. La International Game Developers Association disposa d'un grup de treball específic que publica les 'Game Accessibility Guidelines'." },
+            { id: 40, q: "Les aplicacions mòbils tenen un conjunt de pautes d'accessibilitat totalment independents que es gestionen fora del marc dels principis de les WCAG del W3C.", a: false, r: "Fals. Les WCAG (especialment a partir de la versió 2.1 i 2.2) incorporen de forma nativa criteris d'accessibilitat dissenyats específicament per a entorns mòbils i pantalles tàctils." },
+            { id: 41, q: "La Web Accessibility Initiative (WAI) és el grupo de caràcter permanent encarregat dins del consorci W3C de desenvolupar i vetllar per les pautes WCAG.", a: true, r: "Correcte. La WAI és la iniciativa oficial del W3C encarregada de redactar les recomanacions tècniques mundials en accessibilitat." },
+            { id: 42, q: "Els quatre principis rectors que fonamenten les pautes WCAG i que formen l'acrònim POUR són: Perceptible, Operable, Comprensible i Robust.", a: true, r: "Correcte. Són els 4 pilars conceptuals: la informació s'ha de poder veure/sentir (P), la interfície es pot controlar (O), s'ha d'entendre (U) i ha de ser compatible amb el futur (R)." },
+            { id: 43, q: "La versió recomanada actualment i totalment vigent de les pautes internacionals d'accessibilitat web és la versió WCAG 2.2.", a: true, r: "Correcte. Publicada oficialment pel W3C, la versió 2.2 és el document regulador actualitzat que afegeix nous criteris d'èxit de privacitat i disseny mòbil." },
+            { id: 44, q: "A l'estat espanyol, el Reial Decret 1112/2018 exigeix el compliment estricte dels criteris d'accessibilitat web aplicat únicament i en exclusiva a entitats privades.", a: false, r: "Fals. El RD 1112/2018 regula de forma pionera i obligatòria el *sector públic* (administracions, universitats públiques, webs estatals)." },
+            { id: 45, q: "La Llei 11/2023 representa la transposició de l'Acta Europea d'Accessibilitat i afecta de manera directa a sectors privats considerats clau com el comerç electrònic o la banca.", a: true, r: "Correcte. Aquesta llei amplia el focus d'obligació legal al sector d'empreses privades mitjanes/grans que ofereixen serveis essencials al ciutadà." },
+            { id: 46, q: "El Reial Decret 193/2023 estableix l'1 de gener de 2030 com a data límit global de compliment per als béns de naturalesa privada que ja existissin prèviament al mercat.", a: true, r: "Correcte. El marc legal espanyol marca aquesta fita en el cronograma com a límit final per a l'adaptació retroactiva total de productes privats al mercat." },
+            { id: 47, q: "El règim de sancions econòmiques vigent davant d'incompliments molt greus en matèria d'accessibilitat TIC a Espanya pot arribar fins a un màxim d'1.000.000 de milions d'euros.", a: true, r: "Correcte. La legislació vigent imposa severes multes, anant des dels 30.000 € fins al límit màxim d'un milió d'euros per a casos d'exclusió molt greu." },
+            { id: 48, q: "La metodologia de treball estàndard WCAG-EM utilitzada per auditar l'accessibilitat web es divideix de forma seqüencial en exactament un total de 5 passos clau.", a: true, r: "Correcte. La Website Accessibility Conformance Evaluation Methodology (WCAG-EM) s'estructura de forma fixa en 5 passes (definir abast, explorar lloc, escollir mostra, auditar, reportar)." },
+            { id: 49, q: "Les anomenades 'Easy Checks' de l'accessibilitat web inclouen comprovacions ràpides sobre aspectes com el títol del document, la jerarquia de capçaleres i la presència de text alternatiu en imatges.", a: true, r: "Correcte. Són una guia informal del W3C dissenyada perquè qualsevol persona pugui fer un primer diagnòstic visual i de teclat sense ser experta." },
+            { id: 50, q: "L'ordre lògic de navegació per teclat i l'absència absoluta de trampes de teclat ('keyboard traps') són elements irrellevants per a l'avaluació segons les recomanacions de les Easy Checks.", a: false, r: "Fals. Controlar que el focus del teclat no quedi atrapat ('keyboard trap') i que la navegació sigui fluida és precisament un dels controls més crítics de les Easy Checks." },
+            { id: 51, q: "Una eina d'avaluació automàtica (com TAW o WAVE) és totalment autosuficient per decretar si una web és accessible, sense necessitat de cap revisió humana posterior.", a: false, r: "Fals. Els validadors automàtics només aconsegueixen detectar al voltant d'un 30-40% dels problemes reals. La revisió per un expert humà és totalment indispensable per comprovar la semàntica i el sentit." },
+            { id: 52, q: "Es recomana de manera explícita utilitzar com a mínim dues eines o avaluadors automàtics diferents combinats amb l'anàlisi real per reduir els marges d'error de diagnòstic.", a: true, r: "Correcte. Com que cada eina té regles de filtratge diferents, combinar-les (ex: WAVE + TAW) ajuda a capturar més alertes de codi." },
+            { id: 53, q: "L'esdeveniment mundial 'Global Accessibility Awareness Day' (GAAD) se celebra anualment a tot el món de forma fixa el tercer dijous de cada mes de maig.", a: true, r: "Correcte. És la jornada mundial de conscienciació establerta internacionalment per visibilitzar el dret a l'accés digital corporatiu." },
+            { id: 54, q: "Corregir i arreglar els problemes d'accessibilitat digital a posteriori en lloc d'integrar-los en el disseny inicial pot ser fins a 10 vegades més costós per a l'organització.", a: true, r: "Correcte. Modificar codi font de producció, refer l'estructura de dades o redissenyar interfícies ja desplegades multiplica els costos de desenvolupament dràsticament." },
+            { id: 55, q: "El concepte de 'Disseny Adaptat' és aquell que postula que un disseny únic i completament flexible ha de servir de manera directa per a qualsevol dispositiu i tipus d'usuari.", a: false, r: "Fals. El disseny adaptat implica fer *solucions específiques o segregades* ajustades a necessitats determinades. La recerca d'una única opció flexible es coneix com a Disseny Universal." },
+            { id: 56, q: "Els tres nivells formals de conformitat establerts per mesurar la fites de cumplimiento dins dels criteris de les WCAG es divideixen en les categories: A, AA i AAA.", a: true, r: "Correcte. El nivell A és el mínim obligatori, AA és l'estàndard exigit per la majoria de lleis internacionals, i AAA és el grau d'excel·lència més exigent." },
+            { id: 57, q: "L'aplicació d'anàlisi de Google anomenada 'Accessibility Scanner' serveix exclusivament per auditar codi de pàgines web en servidors Linux i no per a aplicacions de telèfons mòbils.", a: false, r: "Fals. 'Accessibility Scanner' és una eina nativa per a dispositius mòbils Android que analitza pantalles d'aplicacions mòbils per trobar problemes de contrast o mides de botó." },
+            { id: 58, q: "El principi de 'Robustesa' en el marc del POUR dictamina que els continguts digitals han de ser prou compatibles com per funcionar correctament tant amb les tecnologies d'assistència actuals com futures.", a: true, r: "Correcte. Un desenvolupament robust utilitza un codi net i estàndard perquè qualsevol lector de pantalla, avui o d'aquí a 5 anys, el pugui interpretar correctament." },
+            { id: 59, q: "La primera jornada d'Accessibilitat Digital organitzada en l'entorn de la Universitat de Lleida (UdL) s'ha datat durant l'any acadèmic 2026.", a: true, r: "Correcte. Així consta recollit en les cròniques de divulgació docent de la pròpia matèria de la universitat." },
+            { id: 60, q: "Si una imatge d'una web passa satisfactòriament un validador automàtic perquè conté un atribut 'alt', s'assegura completament que el heratgen contingut textual alternatiu té sentit per a l'usuari cec.", a: false, r: "Fals. L'eina automàtica només comprova que l'atribut `alt` *existeix* en el codi, però no pot saber si el text escrit és útil (ex: si posa 'imatge1.jpg' en lloc de descriure la fotografia)." },
 
-<script>
-    // BASE DE DATOS DE EJEMPLO (Añade aquí tus preguntas reales)
-    // Asegúrate de tener al menos 32 preguntas en este array
-    const allQuestions = [
-        // ==========================================
-        // BLOQUE 1: FUNDAMENTOS (ISO, Accesibilidad, UX)
-        // ==========================================
-        { id: 1, q: "La usabilidad se define según ISO 9241-11 como efectividad, eficiencia y satisfacción.", a: true },
-        { id: 2, q: "La accesibilidad web solo beneficia a personas con discapacidades sensoriales.", a: false },
-        { id: 3, q: "La Experiencia de Usuario (UX) engloba las emociones y percepciones del usuario.", a: true },
-        { id: 4, q: "Un sistema puede ser usable pero no ser accesible.", a: true },
-        { id: 5, q: "La eficiencia se mide por los recursos gastados en relación a la precisión de las metas.", a: true },
-        { id: 6, q: "La 'satisfacción' es la ausencia de incomodidad y la actitud positiva al usar el producto.", a: true },
-        { id: 7, q: "La ISO/IEC 25010 es el estándar que sustituye a la antigua ISO 9126 sobre calidad de software.", a: true },
-        { id: 8, q: "El diseño universal busca crear productos diferentes para cada tipo de discapacidad.", a: false },
-        { id: 9, q: "La accesibilidad es una responsabilidad ética y, en muchos casos, legal.", a: true },
-        { id: 10, q: "El término UX fue popularizado por Donald Norman en los años 90.", a: true },
-        { id: 11, q: "Un producto con buena usabilidad garantiza automáticamente una excelente UX.", a: false },
-        { id: 12, q: "Las pautas WCAG 2.1 son el estándar internacional para la accesibilidad web.", a: true },
-        { id: 13, q: "El principio 'Robustez' de la accesibilidad implica que el contenido sea interpretable por diversas herramientas.", a: true },
-        { id: 14, q: "La usabilidad solo se aplica a interfaces de ordenadores de sobremesa.", a: false },
-        { id: 15, q: "La 'facilidad de aprendizaje' (learnability) es un atributo clásico de la usabilidad.", a: true },
-        { id: 16, q: "El diseño inclusivo ignora las necesidades de los usuarios expertos.", a: false },
-        { id: 17, q: "La percepción estética puede influir positivamente en la usabilidad percibida.", a: true },
-        { id: 18, q: "La accesibilidad cognitiva no forma parte de las preocupaciones de la IPO.", a: false },
-        { id: 19, q: "La usabilidad es un proceso que debe evaluarse durante todo el ciclo de vida.", a: true },
-        { id: 20, q: "Un sistema 'utilizable' es siempre 'útil'.", a: false },
+            // ==========================================
+            // TEMA 8.1: ESTILS I PARADIGMES (Preguntes 61 - 90)
+            // ==========================================
+            { id: 61, q: "L'intercanvi de comunicació complet que succeeix de manera contínua entre l'usuari humà i el computador rep el nom tècnic d'interacció.", a: true, r: "Correcte. Segons Baecker i Buxton, la interacció és el flux bidireccional i complet d'estímuls i respostes entre l'humà i la màquina." },
+            { id: 62, q: "El canal de comunicació de la interacció està estructurat per tres pilars fonamentals de mediació: els bits, la interfície com a capa mitjançant i l'usuari humà.", a: true, r: "Correcte. Són els tres components elementals: la representació interna de la màquina (bits), la zona de traducció (interfície) i l'agent receptor (usuari)." },
+            { id: 63, q: "L'evolució històrica de la interacció IPO descriu un camí progressiu que s'allunya de la naturalitat, centrant-se cada cop més en sistemes d'ordres abstractes i complexes.", a: false, r: "Fals. L'evolució camina precisament *cap a la naturalitat*, buscant que l'usuari es comuniqui fent servir les seves habilitats naturals (veu, gestos, manipulació física) i abandonant les ordres abstractes de codi." },
+            { id: 64, q: "L'ordre cronològic d'evolució parteix de les línies de comandes, seguint pels menús de navegació, la manipulació directa, fins a arribar al llenguatge natural i els nous paradigmes.", a: true, r: "Correcte. És la línia temporal històrica del disseny d'interfícies des dels anys 60 fins a l'actualitat hiperconnectada." },
+            { id: 65, q: "Un estil d'interacció es pot definir com el terme de caràcter genèric que serveix per agrupar les diverses maneres mitjançant les quals els usuaris es comuniquen amb l'ordinador.", a: true, r: "Correcte. Preece (1994) defineix l'estil com la modalitat o el marc conversacional genèric de la interfície." },
+            { id: 66, q: "L'estil d'interfície basat en línies de comandes és considerat històricament el primer a ser d'ús generalitzat i destaca per oferir poca flexibilitat als administradors de sistemes.", a: false, r: "Fals. Tot i que és complex, destaca precisament per oferir una *altíssima flexibilitat i potència* als experts, motiu pel qual els enginyers el segueixen utilitzant en sistemes de servidors." },
+            { id: 67, q: "Les interfícies per línia d'ordres requereixen un alt cost d'aprenentatge i memòria a causa de la necessitat de conèixer paraules de memòria, caràcters concrets o abreviacions.", a: true, r: "Correcte. Obliguen a treballar mitjançant el mecanisme de *recordar* lliurement la sintaxi exacta, la qual cosa eleva enormement la corba d'aprenentatge per a un usuari comú." },
+            { id: 68, q: "Els menús de navegació consisteixen en conjunts d'opcions de caràcter visual exposades a la pantalla que permeten a l'usuari la seva selecció de manera explícita.", a: true, r: "Correcte. Transformen la interacció obligant el cervell a *reconèixer* elements llistats en lloc d'haver de teclejar codis." },
+            { id: 69, q: "L'inconvenient de disseny visual més rellevant lligat directament a l'ús dels menús de navegació és que aquests ocupen massa espai útil i fix a la pantalla.", a: true, r: "Correcte. Si el llistat d'opcions és gran i es manté visible constantment, es redueix severament l'àrea disponible per mostrar el contingut principal." },
+            { id: 70, q: "La implementació d'estructures com els menús desplegables o els menús emergents ('pop-ups') s'utilitzen per solucionar el problema de la pèrdua d'espai en pantalla dels menús fixos.", a: true, r: "Correcte. Permeten que les opcions romanguin ocultes sota un botó o acció i només apareguin temporalment quan l'usuari ho demana de forma explícita." },
+            { id: 71, q: "L'estil de manipulació directa es caracteritza pel fet que l'usuari executa ordres de tipus irreversible que triguen molt de temps a veure's reflectides visualment a la interfície.", a: false, r: "Fals. La manipulació directa es basa exactament en el contrari: operacions *reversibles* (es pot desfer) i un impacte visual *immediat* de l'acció en l'objecte (com arrossegar un fitxer a la paperera)." },
+            { id: 72, q: "L'acrònim de disseny clàssic WIMP prové exactament de les sigles en anglès: Windows (finestres), Icons (icones), Menus (menús) i Pointers (punters).", a: true, r: "Correcte. És l'esquelet fonamental que va donar origen a les primeres interfícies gràfiques d'usuari comercials d'èxit corporatiu." },
+            { id: 73, q: "L'anomenada 'Interacció Assistida' trenca la visió de l'ordinador com una simple eina i fa ús de la metàfora d'un agent o assistent que col·labora amb l'humà de forma cooperativa.", a: true, r: "Correcte. L'usuari ja no 'manipula' directament cada bit, sinó que delega la feina en un agent virtual autònom que executa tasques en el seu nom." },
+            { id: 74, q: "En la interacció assistida, l'usuari manté obligatòriament el control absolut i complet de la interacció, dirigint de manera explícita totes i cadascuna de les decisions del sistema.", a: false, r: "Fals. Es basa en la *delegació de tasques*. L'agent pren decisions de manera semiautònoma o proactiva per reduir dràsticament l'esforç i l'atenció contínua de l'humà." },
+            { id: 75, q: "Eines clàssiques com el famós clip de Microsoft Office o figures municipals actuals de gestió com l'assistent virtual 'Berta' de la Paeria de Lleida són exemples d'interacció assistida.", a: true, r: "Correcte. Són encarnacions clares del paradigma d'assistents conversacionals creats per guiar de forma col·laborativa l'usuari." },
+            { id: 76, q: "La interfície de tipus natural o NUI es fonamenta en una interacció directa que fa ús principal del llenguatge natural, la veu i els propis moviments del cos humà.", a: true, r: "Correcte. Les Natural User Interfaces (NUI) busquen que la corba d'aprenentatge de la interfície sigui pràcticament invisible aprofitant els hàbits motrius diaris." },
+            { id: 77, q: "Dins de les interfícies de llenguatge natural, mai cal activar diàlegs de clarificació, ja que la veu humana s'interpreta lliure d'ambigüitats de forma automàtica.", a: false, r: "Fals. El llenguatge humà és inherentment ambigu i contextual. Els diàlegs de clarificació (ex: 'He entès que vols tancar el programa, és correcte?') són del tot obligatoris per evitar errors greus." },
+            { id: 78, q: "Un paradigma d'interacció representa una abstracció teòrica que s'encarrega d'organitzar i agrupar els diferents estils en models homogenis amb característiques similars.", a: true, r: "Correcte. El paradigma és el marc filosòfic i conceptual ampli (com el paradigma de sobretaula o l'ubícol) que engloba un o diversos estils tècnics d'interacció." },
+            { id: 79, q: "En el paradigma de l'ordinador de sobretaula, la interacció realitzada amb l'ordinador i les accions de l'usuari en el món real queden completament aïllades l'una de l'altra.", a: true, r: "Correcte. L'usuari seu davant d'una pantalla fixa i la seva atenció es desconnecta del món que l'envolta; tot passa exclusivament dins de la caixa virtual de l'escriptori." },
+            { id: 80, q: "La Realitat Virtual consisteix en una simulació per computador en format 3D que aconsegueix fer desaparèixer temporalment la interacció de l'usuari amb el món real.", a: true, r: "Correcte. Mitjançant dispositius com els cascos de RV, es bloqueja el canal visual extern per aconseguir una *immersió total* de l'usuari en un entorn completament simulat." },
+            { id: 81, q: "Dispositius d'alta tecnologia com els guants hàptics ('HaptX') tenen com a objectiu permetre a l'usuari sentir de forma física estímuls tàctils i de resistència d'objectes virtuals.", a: true, r: "Correcte. Envien impulsos pneumàtics o mecànics a la pell i articulacions de les mans per recrear de forma artificial el sentit de la densitat, volum o textura virtual." },
+            { id: 82, q: "El pare conceptual i tecnològic de la Computació Ubíqua va ser Mark Weiser, investigador del prestigiós centre Xerox PARC l'any 1991.", a: true, r: "Correcte. Mark Weiser va publicar el cèlebre manifest que va predir un futur on els ordinadors deixarien de ser objectes aïllats per passar a formar part del teixit de l'entorn." },
+            { id: 83, q: "La Computació Ubíqua argumenta que l'usuari és qui ha de realitzar un esforç actiu d'adaptació mental per introduir-se en l'entorn tecnològic de la màquina.", a: false, r: "Fals. La filosofia ubiqua dicta el contrari: és la tecnologia la que s'ha d'integrar en la vida diària i invisible de les persones sense demanar atenció conscient (tecnologia calma)." },
+            { id: 84, q: "En el paradigma de la Computació Ubíqua, la capacitat de càlcul informàtic es dilueix completament en l'entorn urbà o personal a través de dispositius en xarxa.", a: true, r: "Correcte. Els microcomputadors s'amaguen dins d'objectes quotidians que parlen entre si sense necessitat d'una pantalla d'escriptori tradicional." },
+            { id: 85, q: "La Computació Ubíqua s'ha materialitzat en la realitat tecnològica de la nostra societat sota el concepte conegut com a Internet de les Coses (IoT).", a: true, r: "Correcte. L'IoT (bombetes intel·ligents, sensors de temperatura domèstics, polseres d'activitat) és la implementació de mercat directa de la tesi ubiqua." },
+            { id: 86, q: "La Computació Ubíqua i la Realitat Virtual són conceptes idèntics que busquen crear mons de naturalesa completament imaginària aïllant l'usuari de l'entorn físic real.", a: false, r: "Fals. Són pols oposats. La Realitat Virtual t'aïlla del món físic per portar-te a un món artificial; la Computació Ubíqua manté l'usuari en el món físic real enriquint el seu entorn immediat." },
+            { id: 87, q: "La Realitat Augmentada utilitza la informació de l'entorn real com a via d'entrada implícita, enriquint la pròpia base de la realitat amb informació o capes digitals.", a: true, r: "Correcte. La base visual segueix sent el món físic real (vist a través de càmeres o ulleres transparents), sobre el qual se superposen elements gràfics 3D." },
+            { id: 88, q: "En el paradigma de la Realitat Augmentada, el món real és completament eliminat de la vista de l'usuari i substituït completament des del primer minut per gràfics simulats en 3D.", a: false, r: "Fals. Això descriu la Realitat Virtual. La Realitat Augmentada mai elimina el món físic; conviu amb ell acoblant-hi informació addicional en temps real." },
+            { id: 89, q: "El concepte urbà de Ciutat Intel·ligent ('Smart City') es pot visualitzar teòricament com un colossal ordinador distribuït on els sensors fan el paper dels dispositius d'entrada clàssics.", a: true, r: "Correcte. Els sensors de trànsit, càmeres o analitzadors de pol·lució actuen recollint dades de la realitat urbana contínuament igual que ho fa un teclat." },
+            { id: 90, q: "Dins d'una Smart City, elements clàssics d'infraestructura pública com semàfors, fanals o estacions de servei funcionen de forma equivalent als dispositius de sortida.", a: true, r: "Correcte. Són els actuadors físics que reben els càlculs centralitzats per canviar els seus estats (ex: encendre llums o regular carrils de trànsit de forma automatitzada)." }
+        ];
 
-        // ==========================================
-        // BLOQUE 2: DCU Y MODELO MPIu+a
-        // ==========================================
-        { id: 21, q: "El modelo MPIu+a sitúa la usabilidad como el pilar central del desarrollo.", a: true },
-        { id: 22, q: "En el DCU, los usuarios deben participar en todas las etapas del diseño.", a: true },
-        { id: 23, q: "El MPIu+a propone separar totalmente la ingeniería del software de la usabilidad.", a: false },
-        { id: 24, q: "El análisis de la competencia es una actividad común en la fase de análisis de requisitos.", a: true },
-        { id: 25, q: "Los 'Stakeholders' son cualquier persona u organización afectada por el sistema.", a: true },
-        { id: 26, q: "El diseño centrado en el usuario es un proceso lineal sin retroalimentación.", a: false },
-        { id: 27, q: "Una 'Persona' en DCU se basa en datos reales de usuarios, no en suposiciones.", a: true },
-        { id: 28, q: "El análisis de tareas permite conocer qué pasos sigue el usuario para cumplir un objetivo.", a: true },
-        { id: 29, q: "La fase de prototipado en MPIu+a ocurre antes de conocer los requisitos del usuario.", a: false },
-        { id: 30, q: "El diseño conceptual define el modelo mental que el sistema presentará al usuario.", a: true },
-        { id: 31, q: "El MPIu+a incluye una etapa específica de instalación y mantenimiento.", a: true },
-        { id: 32, q: "En DCU, el equipo de diseño debe ser obligatoriamente monodisciplinar.", a: false },
-        { id: 33, q: "La técnica de 'Escenarios' ayuda a contextualizar el uso del producto.", a: true },
-        { id: 34, q: "El modelo MPIu+a es compatible con metodologías ágiles como Scrum.", a: true },
-        { id: 35, q: "El análisis de requisitos de usabilidad incluye definir métricas cuantificables.", a: true },
-        { id: 36, q: "La 'Arquitectura de Información' organiza cómo se estructura el contenido.", a: true },
-        { id: 37, q: "El diseño visual debe decidirse antes que el diseño de interacción.", a: false },
-        { id: 38, q: "Un objetivo del DCU es reducir los costes de soporte técnico tras el lanzamiento.", a: true },
-        { id: 39, q: "La validación con usuarios es la última fase y no permite volver atrás.", a: false },
-        { id: 40, q: "El MPIu+a destaca la importancia del prototipado iterativo.", a: true },
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let userResults = [];
 
-        // ==========================================
-        // BLOQUE 3: PROTOTIPADO
-        // ==========================================
-        { id: 41, q: "Un prototipo de baja fidelidad es ideal para detectar errores de flujo narrativo.", a: true },
-        { id: 42, q: "Los prototipos de alta fidelidad se crean habitualmente con papel y lápiz.", a: false },
-        { id: 43, q: "El 'Storyboarding' es una técnica de prototipado situacional.", a: true },
-        { id: 44, q: "Los prototipos horizontales muestran toda la interfaz pero sin funcionalidad profunda.", a: true },
-        { id: 45, q: "Un prototipo vertical implementa pocas funciones pero de forma completa (hasta la BD).", a: true },
-        { id: 46, q: "Los prototipos de baja fidelidad distraen al usuario con detalles estéticos innecesarios.", a: false },
-        { id: 47, q: "Un Wireframe es una representación estática de la estructura de una pantalla.", a: true },
-        { id: 48, q: "El prototipado evolutivo busca que el prototipo se convierta en el producto final.", a: true },
-        { id: 49, q: "El prototipado desechable se tira una vez se han validado los requisitos.", a: true },
-        { id: 50, q: "El 'Mago de Oz' es una técnica donde un humano simula la respuesta del sistema.", a: true },
-        { id: 51, q: "Los prototipos Hi-Fi permiten realizar tests de rendimiento técnico real.", a: true },
-        { id: 52, q: "Prototipar en papel es una pérdida de tiempo en proyectos de software complejo.", a: false },
-        { id: 53, q: "Los prototipos permiten comunicar ideas a los stakeholders de forma tangible.", a: true },
-        { id: 54, q: "Un Mockup es lo mismo que un prototipo funcional interactivo.", a: false },
-        { id: 55, q: "El prototipado reduce la ambigüedad en las especificaciones.", a: true },
-        { id: 56, q: "En fases iniciales, es mejor usar prototipos de alta fidelidad.", a: false },
-        { id: 57, q: "Las herramientas como Figma o Adobe XD permiten crear prototipos de fidelidad media-alta.", a: true },
-        { id: 58, q: "Un prototipo puede ayudar a estimar mejor los tiempos de desarrollo.", a: true },
-        { id: 59, q: "Los usuarios tienden a dar feedback más crítico sobre el diseño en prototipos Lo-Fi.", a: true },
-        { id: 60, q: "El prototipado rápido ignora por completo las necesidades del usuario.", a: false },
-
-        // ==========================================
-        // BLOQUE 4: EVALUACIÓN
-        // ==========================================
-        { id: 61, q: "La evaluación heurística es un método de inspección realizado por expertos.", a: true },
-        { id: 62, q: "Un test de usuarios requiere al menos 50 personas para ser válido en diseño formativo.", a: false },
-        { id: 63, q: "La técnica 'Think Aloud' obliga al usuario a explicar qué está haciendo y por qué.", a: true },
-        { id: 64, q: "La evaluación sumativa se realiza durante el desarrollo para corregir errores.", a: false },
-        { id: 65, q: "El cuestionario SUS (System Usability Scale) mide la usabilidad percibida.", a: true },
-        { id: 66, q: "En un test de usuarios, el evaluador debe ayudar al usuario si este se bloquea.", a: false },
-        { id: 67, q: "La evaluación formativa ayuda a guiar el diseño mientras se está creando.", a: true },
-        { id: 68, q: "Los métodos empíricos se basan en la observación de usuarios reales.", a: true },
-        { id: 69, q: "El 'Recorrido Cognitivo' se centra en evaluar la facilidad de aprendizaje del sistema.", a: true },
-        { id: 70, q: "El Eye-tracking permite saber exactamente qué está mirando el usuario.", a: true },
-        { id: 71, q: "La evaluación heurística de Nielsen incluye 10 principios generales.", a: true },
-        { id: 72, q: "Un error crítico es aquel que impide al usuario completar la tarea principal.", a: true },
-        { id: 73, q: "El test de guerrilla es costoso y requiere laboratorios especializados.", a: false },
-        { id: 74, q: "Los tests remotos pueden ser síncronos o asíncronos.", a: true },
-        { id: 75, q: "La tasa de éxito es una métrica común en los tests de usabilidad.", a: true },
-        { id: 76, q: "Los expertos en una evaluación heurística siempre detectan el 100% de los errores.", a: false },
-        { id: 77, q: "El feedback post-test es útil para recoger impresiones subjetivas.", a: true },
-        { id: 78, q: "La observación directa puede influir en el comportamiento del usuario (efecto Hawthorne).", a: true },
-        { id: 79, q: "Un informe de evaluación debe priorizar los problemas encontrados según su gravedad.", a: true },
-        { id: 80, q: "La evaluación de accesibilidad solo se puede hacer con herramientas automáticas.", a: false },
-
-        // ==========================================
-        // BLOQUE 5: DISEÑO DE LA INTERFAZ (UI)
-        // ==========================================
-        { id: 81, q: "Los 'Affordances' son las posibilidades de acción que un objeto sugiere al usuario.", a: true },
-        { id: 82, q: "La Ley de Fitts predice el tiempo necesario para moverse a un objetivo.", a: true },
-        { id: 83, q: "La consistencia externa significa que nuestra App debe parecerse a otras App del mercado.", a: true },
-        { id: 84, q: "El principio de visibilidad implica ocultar el estado del sistema para no agobiar.", a: false },
-        { id: 85, q: "Los errores deben ser prevenidos mediante un diseño que minimice las equivocaciones.", a: true },
-        { id: 86, q: "La Ley de Hick dice que el tiempo de decisión aumenta con el número de opciones.", a: true },
-        { id: 87, q: "El uso de metáforas (ej. la papelera) ayuda al usuario a entender el sistema.", a: true },
-        { id: 88, q: "La carga cognitiva debe ser maximizada para mantener al usuario atento.", a: false },
-        { id: 89, q: "El contraste de color es vital para la legibilidad y la accesibilidad.", a: true },
-        { id: 90, q: "Los menús de navegación deben ser lo más profundos posible.", a: false },
-        { id: 91, q: "La respuesta del sistema a una acción del usuario debe ser inmediata (feedback).", a: true },
-        { id: 92, q: "El diseño minimalista elimina cualquier elemento que no aporte valor a la tarea.", a: true },
-        { id: 93, q: "El 'Modelo Mental' es la idea que el usuario tiene de cómo funciona el sistema.", a: true },
-        { id: 94, q: "Los usuarios expertos prefieren atajos de teclado y aceleradores.", a: true },
-        { id: 95, q: "El agrupamiento de elementos relacionados se basa en las leyes de la Gestalt.", a: true },
-        { id: 96, q: "La tipografía solo tiene una función estética en el diseño de interfaces.", a: false },
-        { id: 97, q: "Los mensajes de error deben indicar claramente el problema y sugerir una solución.", a: true },
-        { id: 98, q: "La 'Familiaridad' reduce el esfuerzo necesario para aprender una nueva interfaz.", a: true },
-        { id: 99, q: "Un buen diseño obliga al usuario a recordar muchos datos entre pantallas.", a: false },
-        { id: 100, q: "La jerarquía visual guía el ojo del usuario hacia los elementos más importantes.", a: true },
-
-        // ==========================================
-        // Preguntes extretes de l'examen 2016-17
-        // ==========================================
-        { id: 101, q: "L'Standard ISO 9241-11 defineix USABILITAT independentment del context d'ús on es produeix la interacció.", a: false },
-        { id: 102, q: "Segons l'ISO/IEC 25010:2011, la usabilitat està present tant en la Qualitat en l'ús com en la Qualitat del producte.", a: true },
-        { id: 103, q: "L'experiència d'usuari (UX) atén factors interns i externs que causen sensacions en un context d'ús determinat.", a: true },
-        { id: 104, q: "El Disseny Centrat en l'Usuari (DCU) implica que els usuaris participen directament com si fossin dissenyadors.", a: false },
-        { id: 105, q: "El model MPlu+a integra el cicle de vida de l'Enginyeria del Software amb el Disseny Centrat en l'Usuari.", a: true },
-        { id: 106, q: "Un prototip s'utilitza per explorar aspectes interactius, incloent usabilitat, accessibilitat i funcionalitat.", a: true },
-        { id: 107, q: "Un 'wireframe' és una tècnica d'avaluació de la usabilitat que utilitza una versió pseudo-interactiva.", a: false },
-        { id: 108, q: "L'storyboarding i els escenaris es classifiquen com a 'tècniques de prototipat situacional'.", a: true },
-        { id: 109, q: "La percepció humana és independent de les experiències passades o del context d'ús segons el disseny d'interfícies.", a: false },
-        { id: 110, q: "El terme 'satisfycing' vol dir que els usuaris només estan satisfets si troben el camí òptim.", a: false },
-        { id: 111, q: "El Número de Miller és útil per determinar el nombre d'opcions en un menú auditiu a causa de la STM.", a: true },
-        { id: 112, q: "La Computació Ubiqua estén la capacitat d'interacció a tot l'entorn, el que coneixem com a IoT.", a: true },
-        { id: 113, q: "El terme 'stakeholders' o implicats inclou també els usuaris finals del sistema.", a: true },
-        { id: 114, q: "El Model Mental dels usuaris és molt estable perquè les persones recordem amb detall el que fem.", a: false },
-        { id: 115, q: "La satisfacció és l'atribut d'usabilitat més difícil de mesurar pel seu component subjectiu.", a: true },
-        { id: 116, q: "Els prototips d'alt nivell poden generar falses expectatives entre els usuaris o clients finals.", a: true },
-
-        // ==========================================
-        // Preguntes extretes de l'examen 2017-18
-        // ==========================================
-        { id: 117, q: "En el model ISO/IEC 25010:2011, la usabilitat hi apareix de forma secundària.", a: false },
-        { id: 118, q: "En el Disseny Centrat en l'Usuari (DCU), la usabilitat és l'objectiu principal.", a: true },
-        { id: 119, q: "Els stakeholders només inclouen els usuaris directes, no els indirectes.", a: false },
-        { id: 120, q: "L'objectiu principal d'un prototip en paper és verificar tant les idees interactives com l'estètica final.", a: false },
-        { id: 121, q: "La percepció es veu molt influenciada per experiències passades, context i objectius personals.", a: true },
-        { id: 122, q: "La consistència d'una interfície redueix el temps d'aprenentatge i elimina la confusió.", a: true },
-        { id: 123, q: "Una interfície responsive sempre és més usable que una que no ho és pel fet d'ajustar-se a la mida.", a: false },
-        { id: 124, q: "La navegabilitat fa referència a la coherència amb l'Arquitectura de la Informació i la jerarquia.", a: true },
-        { id: 125, q: "La tipografia és un element que no afecta a la usabilitat ni a l'experiència d'usuari.", a: false },
-        { id: 126, q: "Si la interfície és usable, l'estètica ja no és important en termes d'usabilitat.", a: false },
-        { id: 127, q: "L'ús actual dels automòbils és un exemple del paradigma de Computació Ubiqua.", a: true },
-        { id: 128, q: "La satisfacció és el més fàcil de mesurar dels atributs de la usabilitat.", a: false },
-        { id: 129, q: "Els prototips de baix nivell són eines potents per a la comunicació entre l'equip de disseny i stakeholders.", a: true },
-        { id: 130, q: "Els 'menús auditius' generen poca demanda d'emmagatzemament i processament a la memòria STM.", a: false }
-    ];
-
-    let currentQuestions = [];
-    let currentIndex = 0;
-    let userResults = [];
-    let lock = false;
-
-    function init() {
-        // Barajar y seleccionar 32 preguntas
-        currentQuestions = [...allQuestions]
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 32);
-
-        currentIndex = 0;
-        userResults = [];
-        renderQuestion();
-    }
-
-    function renderQuestion() {
-        lock = false;
-        const qData = currentQuestions[currentIndex];
-        document.getElementById('question-text').innerText = qData.q;
-        document.getElementById('counter').innerText = `PREGUNTA ${currentIndex + 1}/${currentQuestions.length}`;
-        document.getElementById('progress-fill').style.width = `${((currentIndex + 1) / currentQuestions.length) * 100}%`;
-        
-        document.getElementById('btn-true').className = '';
-        document.getElementById('btn-false').className = '';
-    }
-
-    function handleAnswer(ans) {
-        if (lock) return;
-        lock = true;
-
-        const qData = currentQuestions[currentIndex];
-        const isCorrect = ans === qData.a;
-        const btnClicked = document.getElementById(ans ? 'btn-true' : 'btn-false');
-        const body = document.getElementById('body-bg');
-
-        userResults.push({ id: qData.id, correct: isCorrect });
-
-        if (isCorrect) {
-            btnClicked.classList.add('btn-correct');
-            body.classList.add('correct-flash');
-            setTimeout(() => {
-                body.classList.remove('correct-flash');
-                next();
-            }, 400);
-        } else {
-            btnClicked.classList.add('btn-wrong');
-            document.getElementById(qData.a ? 'btn-true' : 'btn-false').classList.add('btn-correct');
-            body.classList.add('wrong-flash');
-            setTimeout(() => {
-                body.classList.remove('wrong-flash');
-                next();
-            }, 1800);
-        }
-    }
-
-    function next() {
-        if (currentIndex < currentQuestions.length - 1) {
-            currentIndex++;
+        function initQuiz() {
+            currentQuestions = [...allQuestions].sort(() => 0.5 - Math.random());
+            currentIndex = 0;
+            userResults = [];
             renderQuestion();
-        } else {
-            showResults();
         }
-    }
 
-    function showResults() {
-        document.getElementById('content-area').classList.add('hidden');
-        document.getElementById('quiz-header').classList.add('hidden');
-        document.getElementById('results-screen').classList.remove('hidden');
-        
-        const corrects = userResults.filter(r => r.correct).length;
-        const wrongs = userResults.length - corrects;
-        
-        // Cálculo de nota: acierto +0.25, fallo -0.125
-        const finalScore = (corrects * 0.25) - (wrongs * 0.125);
-        const scoreNormalized = Math.max(0, finalScore).toFixed(3);
+        function renderQuestion() {
+            const qObj = currentQuestions[currentIndex];
+            
+            document.getElementById('question-text').innerText = qObj.q;
+            document.getElementById('question-counter').innerText = `Pregunta ${currentIndex + 1} de ${currentQuestions.length}`;
+            document.getElementById('progress-bar').style.width = `${((currentIndex) / currentQuestions.length) * 100}%`;
+            
+            document.getElementById('reasoning-box').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'none';
+            
+            const btnTrue = document.getElementById('btn-true');
+            const btnFalse = document.getElementById('btn-false');
+            
+            btnTrue.disabled = false;
+            btnFalse.disabled = false;
+            btnTrue.style.opacity = "1";
+            btnFalse.style.opacity = "1";
+            
+            updateLiveScore();
+        }
 
-        document.getElementById('final-grade').innerText = scoreNormalized;
-        document.getElementById('final-stats').innerHTML = `
-            Acierts: <strong>${corrects}</strong> (+${(corrects * 0.25).toFixed(2)})<br>
-            Errors: <strong>${wrongs}</strong> (-${(wrongs * 0.125).toFixed(3)})
-        `;
-        
-        const grid = document.getElementById('feedback-grid');
-        userResults.forEach((r, idx) => {
-            const div = document.createElement('div');
-            div.className = `grid-item ${r.correct ? 'btn-correct' : 'btn-wrong'}`;
-            div.innerText = idx + 1;
-            grid.appendChild(div);
-        });
-    }
+        function handleAnswer(userChoice) {
+            const qObj = currentQuestions[currentIndex];
+            const isCorrect = (userChoice === qObj.a);
+            
+            userResults.push({ id: qObj.id, correct: isCorrect });
 
-    init();
-</script>
+            document.getElementById('btn-true').disabled = true;
+            document.getElementById('btn-false').disabled = true;
+
+            const reasoningBox = document.getElementById('reasoning-box');
+            const reasoningTitle = document.getElementById('reasoning-title');
+            const reasoningText = document.getElementById('reasoning-text');
+            
+            reasoningBox.className = "reasoning-box " + (isCorrect ? "correct" : "wrong");
+            
+            if (isCorrect) {
+                reasoningTitle.innerHTML = "✨ ¡Aciert! Resposta correcta";
+            } else {
+                reasoningTitle.innerHTML = "❌ ¡Error! La resposta correcta era " + (qObj.a ? "'CERT'" : "'FALS'");
+            }
+
+            const textJustificacio = qObj.r ? qObj.r : `Aquesta afirmació és oficialment ${qObj.a ? 'verídica (Certa)' : 'errònia (Falsa)'} segons els criteris docents.`;
+            reasoningText.innerText = textJustificacio;
+            
+            reasoningBox.style.display = 'block';
+            document.getElementById('btn-next').style.display = 'block';
+            
+            updateLiveScore();
+        }
+
+        function nextQuestion() {
+            if (currentIndex < currentQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateLiveScore() {
+            if(userResults.length === 0) {
+                document.getElementById('score-live').innerText = "Nota temporal: 0.000";
+                return;
+            }
+            const corrects = userResults.filter(r => r.correct).length;
+            const wrongs = userResults.length - corrects;
+            const liveScore = Math.max(0, (corrects * 0.25) - (wrongs * 0.125));
+            document.getElementById('score-live').innerText = `Nota temporal: ${liveScore.toFixed(3)}`;
+        }
+
+        function showResults() {
+            document.getElementById('content-area').classList.add('hidden');
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+            
+            const corrects = userResults.filter(r => r.correct).length;
+            const wrongs = userResults.length - corrects;
+            
+            const finalScore = (corrects * 0.25) - (wrongs * 0.125);
+            const scoreNormalized = Math.max(0, finalScore).toFixed(3);
+
+            document.getElementById('final-grade').innerText = scoreNormalized;
+            document.getElementById('final-stats').innerHTML = `
+                Acierts: <strong>${corrects}</strong> (+${(corrects * 0.25).toFixed(2)})<br>
+                Errors: <strong>${wrongs}</strong> (-${(wrongs * 0.125).toFixed(3)})
+            `;
+            
+            const grid = document.getElementById('feedback-grid');
+            grid.innerHTML = "";
+            userResults.forEach((r, idx) => {
+                const div = document.createElement('div');
+                div.className = `grid-item ${r.correct ? 'btn-correct' : 'btn-wrong'}`;
+                div.innerText = idx + 1;
+                grid.appendChild(div);
+            });
+        }
+
+        window.onload = initQuiz;
+    </script>
 </body>
 </html>
